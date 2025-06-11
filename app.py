@@ -95,6 +95,31 @@ def submit_vote():
         if conn.is_connected():
             cursor.close()
             conn.close()
+            
+@app.route('/api/total-voters', methods=['GET'])
+def get_total_voters():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    try:
+        cursor = conn.cursor()
+
+        # Sum votes where post is 'headboy'
+        cursor.execute("SELECT SUM(vote) FROM candidates WHERE post = 'headboy'")
+        result = cursor.fetchone()
+        total_votes = result[0] if result[0] is not None else 0
+
+        return jsonify({"total_voters": total_votes})
+
+    except Error as e:
+        print(f"Error fetching total voters: {e}")
+        return jsonify({"error": "Failed to fetch total voters"}), 500
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
