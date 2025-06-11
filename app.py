@@ -196,6 +196,32 @@ def delete_candidate():
         if conn.is_connected():
             cursor.close()
             conn.close()
-            
+
+
+@app.route('/api/delete-votes', methods=['POST'])
+def delete_all_votes():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    try:
+        cursor = conn.cursor()
+
+        # Set vote to 0 for all candidates
+        cursor.execute("UPDATE candidates SET vote = 0")
+        conn.commit()
+
+        return jsonify({"message": "All votes have been reset to 0"})
+
+    except Error as e:
+        print(f"Error resetting votes: {e}")
+        return jsonify({"error": "Failed to reset votes"}), 500
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
