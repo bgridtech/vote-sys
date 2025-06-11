@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import uuid
 import mysql.connector
 from mysql.connector import Error
 import os
@@ -120,6 +121,45 @@ def get_total_voters():
         if conn.is_connected():
             cursor.close()
             conn.close()
+
+
+@app.route('/api/add-candidate', methods=['POST'])
+def add_candidate():
+    data = request.get_json()
+
+    # Validate input
+    required_fields = ['name', 'class', 'post', 'image']
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required candidate data"}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    try:
+        cursor = conn.cursor()
+
+        # Generate a unique candidate ID
+        cand_id = str(uuid.uuid4())
+
+        # Insert candidate into the table
+        cursor.execute("""
+            INSERT INTO candidates (cand_id, name, class, post, image, vote)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (cand_id, data['name'], data['class'], data['post'], data['image'], 0))
+
+        conn.commit()
+        return jsonify({"message": "Candidate added successfully", "cand_id": cand_id})
+
+    except Error as e:
+        print(f"Error inserting candidate: {e}")
+        return jsonify({"error": "Failed to add candidate"}), 500
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
