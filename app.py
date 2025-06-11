@@ -17,7 +17,7 @@ DB_CONFIG = {
     "password": password,
     "host": host,
     "port": 3306,
-    "database": "vote-ben"  
+    "database": "vote_ben"  
 }
 
 def get_db_connection():
