@@ -160,6 +160,42 @@ def add_candidate():
             cursor.close()
             conn.close()
 
+@app.route('/api/delete-candidate', methods=['POST'])
+def delete_candidate():
+    data = request.get_json()
 
+    required_fields = ['name', 'class', 'post']
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    try:
+        cursor = conn.cursor()
+
+        # Delete the candidate based on name, class, and post
+        cursor.execute("""
+            DELETE FROM candidates
+            WHERE name = %s AND class = %s AND post = %s
+        """, (data['name'], data['class'], data['post']))
+
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"message": "No matching candidate found"}), 404
+
+        return jsonify({"message": "Candidate deleted successfully"})
+
+    except Error as e:
+        print(f"Error deleting candidate: {e}")
+        return jsonify({"error": "Failed to delete candidate"}), 500
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+            
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
