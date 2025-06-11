@@ -29,7 +29,7 @@ def get_db_connection():
         print(f"Database connection error: {e}")
         return None
 
-@app.route('/api/voteing', methods=['GET'])
+@app.route('/api/candidates', methods=['GET'])
 def get_candidates_for_voting():
     conn = get_db_connection()
     if not conn:
