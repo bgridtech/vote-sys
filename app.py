@@ -223,5 +223,29 @@ def delete_all_votes():
             conn.close()
 
 
+@app.route('/api/all-details', methods=['GET'])
+def get_all_candidates():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch all records from candidates table
+        cursor.execute("SELECT * FROM candidates")
+        rows = cursor.fetchall()
+
+        return jsonify(rows)
+
+    except Error as e:
+        print(f"Error fetching candidates: {e}")
+        return jsonify({"error": "Failed to fetch candidates"}), 500
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
