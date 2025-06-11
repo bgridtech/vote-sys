@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import mysql.connector
 from mysql.connector import Error
@@ -56,6 +56,55 @@ def get_candidates_for_voting():
     except Error as e:
         print(f"Query error: {e}")
         return jsonify({"error": "Query execution failed"}), 500
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.route('/api/vote', methods=['POST'])
+def submit_vote():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    try:
+        cursor = conn.cursor()
+
+        for post, name in data.items():
+            # Fetch cand_id for the given name and post
+            cursor.execute(
+                "SELECT cand_id FROM candidates WHERE name = %s AND post = %s",
+                (name, post)
+            )
+            result = cursor.fetchone()
+
+            if result:
+                cand_id = result[0]
+                # Increment the vote count
+                cursor.execute(
+                    "UPDATE vote SET vote = vote + 1 WHERE cand_id = %s",
+                    (cand_id,)
+                )
+                # Optional: if no record exists in vote table, insert it
+                if cursor.rowcount == 0:
+                    cursor.execute(
+                        "INSERT INTO vote (cand_id, vote) VALUES (%s, 1)",
+                        (cand_id,)
+                    )
+            else:
+                print(f"No candidate found for {post}: {name}")
+
+        conn.commit()
+        return jsonify({"message": "Vote(s) recorded successfully"})
+
+    except Error as e:
+        print(f"Vote submission error: {e}")
+        return jsonify({"error": "Vote submission failed"}), 500
 
     finally:
         if conn.is_connected():
