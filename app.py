@@ -76,28 +76,13 @@ def submit_vote():
         cursor = conn.cursor()
 
         for post, name in data.items():
-            # Fetch cand_id for the given name and post
+            # Increment the vote count for the candidate with matching name and post
             cursor.execute(
-                "SELECT cand_id FROM candidates WHERE name = %s AND post = %s",
+                "UPDATE candidates SET vote = vote + 1 WHERE name = %s AND post = %s",
                 (name, post)
             )
-            result = cursor.fetchone()
-
-            if result:
-                cand_id = result[0]
-                # Increment the vote count
-                cursor.execute(
-                    "UPDATE vote SET vote = vote + 1 WHERE cand_id = %s",
-                    (cand_id,)
-                )
-                # Optional: if no record exists in vote table, insert it
-                if cursor.rowcount == 0:
-                    cursor.execute(
-                        "INSERT INTO vote (cand_id, vote) VALUES (%s, 1)",
-                        (cand_id,)
-                    )
-            else:
-                print(f"No candidate found for {post}: {name}")
+            if cursor.rowcount == 0:
+                print(f"No candidate found for post '{post}' with name '{name}'")
 
         conn.commit()
         return jsonify({"message": "Vote(s) recorded successfully"})
@@ -110,7 +95,6 @@ def submit_vote():
         if conn.is_connected():
             cursor.close()
             conn.close()
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
