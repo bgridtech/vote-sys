@@ -2,3 +2,4 @@ Flask
 flask_cors
 mysql-connector-python
 gunicorn
+uuid
