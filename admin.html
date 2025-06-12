@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voting Panel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: #f2f2f2;
+      font-family: Arial, sans-serif;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      height: 100px;
+      background-color: #ffffff;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      background-color: #e6e6e6;
+      border: 3px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #f0f0f0;
+    }
+
+    .add-btn:hover {
+      border-color: #2196f3;
+    }
+
+    .remove-btn:hover {
+      border-color: #ff9800;
+    }
+
+    .results-btn {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .results-btn:hover {
+      border-color: #1b5e20;
+      background-color: #45a049;
+    }
+
+    .status-btn:hover {
+      border-color: #9c27b0;
+    }
+
+    .content-wrapper {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      height: calc(100vh - 180px); /* Adjusts for header and bottom buttons */
+      overflow: hidden;
+    }
+
+    .left-section,
+    .right-section {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .left-section {
+      flex: 1;
+    }
+
+    .right-section {
+      flex: 2;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .refresh-btn {
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: bold;
+      border: 2px solid #666;
+      border-radius: 6px;
+      background-color: #f1f1f1;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .refresh-btn:hover {
+      background-color: #e0e0e0;
+      border-color: #333;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 16px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .card {
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .card img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 5px;
+      margin-bottom: 8px;
+    }
+
+    .post {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffffff;
+      background-color: #3f51b5;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .name {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .class-name {
+      font-size: 13px;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .voter-count-wrapper {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .voter-count {
+      font-size: 64px;
+      font-weight: bold;
+      color: #222;
+      text-align: center;
+      word-break: break-word;
+    }
+
+    .bottom-buttons {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background-color: #f2f2f2;
+      z-index: 999;
+    }
+
+    .bottom-btn {
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      border: 3px solid transparent;
+      border-radius: 8px;
+      background-color: #e6e6e6;
+      color: #000;
+      cursor: pointer;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+
+    .bottom-btn:hover {
+      background-color: #dcdcdc;
+      border-color: #888;
+    }
+
+    .delete-btn {
+      color: white;
+      background-color: #e53935;
+    }
+
+    .delete-btn:hover {
+      border-color: #b71c1c;
+      background-color: #d32f2f;
+    }
+
+    .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.modal h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+  color: #333;
+}
+
+.modal label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.modal input,
+.modal select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.modal-buttons button {
+  padding: 8px 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-buttons button[type="submit"] {
+  background-color: #4caf50;
+  color: white;
+}
+
+.modal-buttons button[type="button"] {
+  background-color: #e0e0e0;
+}
+
+
+.candidate-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.candidate-block {
+  border: 2px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.candidate-block img {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.candidate-block.selected {
+  border-color: #e53935;
+  background-color: #fff0f0;
+}
+
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+
+
+
+
+  </style>
+</head>
+<body>
+  <div class="button-container">
+    <button class="btn add-btn">Add Candidate</button>
+    <button class="btn remove-btn">Remove Candidate</button>
+    <button id="getResultsBtn" class="btn results-btn">Get Results</button>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="left-section">
+      <div class="section-header">
+        <div class="section-title">Total Voters</div>
+        <button class="refresh-btn" onclick="fetchVoters()">&#x21bb; Refresh</button>
+      </div>
+      <div class="voter-count-wrapper">
+        <div id="voterCount" class="voter-count">0</div>
+      </div>
+    </div>
+
+    <div class="right-section">
+      <div class="section-header">
+        <div class="section-title">All Candidates</div>
+        <button class="refresh-btn" onclick="fetchCandidates()">&#x21bb; Refresh</button>
+      </div>
+      <div class="card-grid" id="candidateGrid">
+        <!-- Cards will load here -->
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-buttons">
+    <button class="bottom-btn delete-btn">Delete All Votes</button>
+    <button class="bottom-btn">Show Raw Details</button>
+  </div>
+
+
+  <div id="addCandidateModal" style="display: none;" class="modal-overlay">
+  <div class="modal">
+    <h2>Add New Candidate</h2>
+    <form id="candidateForm">
+      <label>
+        Name:
+        <input type="text" name="name" required />
+      </label>
+      <label>
+        Class:
+        <input type="text" name="className" required />
+      </label>
+      <label>
+        Post:
+        <select name="post" required>
+          <option value="">Select Post</option>
+          <option value="headboy">Headboy</option>
+          <option value="headgirl">Headgirl</option>
+        </select>
+      </label>
+      <label>
+        Image URL:
+        <input type="url" name="image" required />
+      </label>
+      <div class="modal-buttons">
+        <button type="submit">Submit</button>
+        <button type="button" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<div id="removeCandidateModal" style="display: none;" class="modal-overlay">
+  <div class="modal" style="max-height: 80vh; overflow-y: auto;">
+    <h2>Select Candidate to Remove</h2>
+    <div id="candidateList" class="candidate-list">
+      <!-- Candidate blocks load here -->
+    </div>
+    <div class="modal-buttons" style="margin-top: 20px;">
+      <button id="deleteSelectedBtn" class="delete-btn" style="display: none;">Delete Candidate</button>
+      <button onclick="closeRemoveModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" style="display: none;" class="modal-overlay">
+  <div class="modal">
+    <h2>Are you sure?</h2>
+    <p>This will permanently delete the selected candidate.</p>
+    <div class="modal-buttons">
+      <button id="confirmDeleteBtn" class="delete-btn">Yes, Delete</button>
+      <button onclick="closeConfirmModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete All Votes Confirmation Modal -->
+<div id="deleteVotesModal" class="modal-overlay" style="display: none;">
+  <div class="modal">
+    <h2>Confirm Deletion</h2>
+    <p>This will permanently delete all votes. Are you sure?</p>
+    <div class="modal-buttons">
+      <button id="confirmDeleteVotesBtn" class="delete-btn">Yes, Delete All</button>
+      <button onclick="closeDeleteVotesModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Raw Details Modal -->
+<div id="rawDetailsModal" style="display: none;" class="modal-overlay">
+  <div class="modal" style="width: 90%; max-width: 1000px; overflow-x: auto;">
+    <h2>Raw Candidate Details</h2>
+    <table id="rawTable" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <thead>
+        <tr style="background-color: #f0f0f0;">
+          <th style="padding: 8px; border: 1px solid #ccc;">ID</th>
+          <th style="padding: 8px; border: 1px solid #ccc;">Cand ID</th>
+          <th style="padding: 8px; border: 1px solid #ccc;">Name</th>
+          <th style="padding: 8px; border: 1px solid #ccc;">Class</th>
+          <th style="padding: 8px; border: 1px solid #ccc;">Post</th>
+          <th style="padding: 8px; border: 1px solid #ccc;">Votes</th>
+          <th style="padding: 8px; border: 1px solid #ccc;">Image</th>
+        </tr>
+      </thead>
+      <tbody id="rawTableBody">
+        <!-- Populated dynamically -->
+      </tbody>
+    </table>
+    <div class="modal-buttons" style="margin-top: 20px;">
+      <button onclick="closeRawModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Results Modal -->
+<div id="resultsModal" style="display: none;" class="modal-overlay">
+  <div class="modal" style="width: 90%; max-width: 800px;">
+    <h2>Election Results</h2>
+    <div id="winnerCardsContainer" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px;">
+      <!-- Cards will be inserted here -->
+    </div>
+    <div class="modal-buttons" style="margin-top: 30px;">
+      <button onclick="closeResultsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="/admin.js"></script>
+</body>
+</html>

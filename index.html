@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voting Portal</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .button-container {
+      display: flex;
+      gap: 60px;
+    }
+    .btn {
+      padding: 30px 70px;
+      font-size: 30px;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      background-color: transparent;
+      color: black;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      text-decoration: none !important;
+    }
+    .voting-btn {
+      border: 4px solid green;
+    }
+    .admin-btn {
+      border: 4px solid red;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-container">
+    <a class="btn voting-btn" href="/voteing.html">Voting Page</a>
+    <a class="btn admin-btn" href="/admin.html">Admin Page</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Election Voting</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/voteing.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <h1>Benhill English School 2025 Election</h1>
+    <div class="container">
+      <div class="flex-row">
+        <!-- Head Boy Section -->
+        <div class="card headboy-section">
+          <h2 class="section-title">Head Boy Candidates</h2>
+          <div class="candidate-grid grid-headboy">
+            <!-- candidate card here -->
+          </div>
+        </div>
+
+        <!-- Head Girl Section -->
+        <div class="card headgirl-section">
+          <h2 class="section-title">Head Girl Candidates</h2>
+          <div class="candidate-grid grid-headgirl">
+            <!-- candidate card here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-container">
+        <button id="submitVote">Submit Vote</button>
+      </div>
+    </div>
+  </div>
+
+    <div style="position: absolute; top: 20px; right: 20px;">
+      <label>
+        <input type="checkbox" id="autoSubmitCheckbox" name="agree">
+        Auto Submit
+      </label>
+    </div>
+
+<script src="/voteing.js"></script>
+
+</body>
+</html>
