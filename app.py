@@ -247,5 +247,50 @@ def get_all_candidates():
             cursor.close()
             conn.close()
 
+
+@app.route('/api/result', methods=['GET'])
+def get_election_results():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+
+        # Get distinct posts
+        cursor.execute("SELECT DISTINCT post FROM candidates")
+        posts = cursor.fetchall()
+
+        results = []
+
+        for post_row in posts:
+            post = post_row['post']
+
+            # Get top-voted candidate(s) for the post
+            cursor.execute("""
+                SELECT name, image, vote 
+                FROM candidates 
+                WHERE post = %s AND vote = (
+                    SELECT MAX(vote) FROM candidates WHERE post = %s
+                )
+            """, (post, post))
+
+            top_candidates = cursor.fetchall()
+            for candidate in top_candidates:
+                candidate['post'] = post  # Add post to the result
+                results.append(candidate)
+
+        return jsonify(results)
+
+    except Error as e:
+        print(f"Error fetching results: {e}")
+        return jsonify({"error": "Failed to fetch results"}), 500
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
